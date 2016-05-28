@@ -34,3 +34,6 @@ Hold down the trigger and move the controller to readjust the view along the x, 
 ##### With 2 controllers 
 Hold down one trigger to readjust the view along the x and y axis
 Hold down both triggers and "pinch" to zoom and rotate the controllers in relation to each other to rotate the camera
+
+## Known issues and TODO
+Please check out the issues tab https://github.com/Fire-Proof/LoLVRSpectate/issues
