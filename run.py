@@ -94,15 +94,11 @@ while True:
 
     pos = vr.hmd.position()
 
-
     lol.yaw = pos.yaw + yaw_offset
     lol.pitch = pos.pitch*-1
     lol.x = (pos.x*scale) + x_offset
     lol.y = (pos.y*scale) + y_offset
     lol.z = (pos.z*scale) + z_offset
-
-
-
 
     if timer.second < datetime.now().second:
         timer = datetime.now()
