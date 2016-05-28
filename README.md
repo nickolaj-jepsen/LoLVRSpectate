@@ -2,6 +2,9 @@
 
 A tool for spectating League of Legends in VR
 
+A video of an earlier version
+[![ ](http://img.youtube.com/vi/VVQz1icy_mI/0.jpg)](http://www.youtube.com/watch?v=VVQz1icy_mI "Video Title")
+
 ## Requirements 
 * a HTC Vive or another VR headset that support for the [OpenVR](https://github.com/ValveSoftware/openvr) SDK
 * VorpX or another program to project League of Legends onto the HMD
