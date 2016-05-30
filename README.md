@@ -29,7 +29,7 @@ modifying the memory it might be caught by some kind of anti-cheat, however, the
 1. Make sure VorpX is running
 2. Make sure the VR environment is active, ie. start SteamVR
 3. Start spectating a game or a replay
-4. When the game is fully loaded, start the program by running `python run.py`
+4. When the game is fully loaded, start the program by running the "LoLVRSpectator.exe" file
 
 ## Controls
 #### Camera
