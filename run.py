@@ -4,8 +4,14 @@ import math
 from datetime import datetime
 from LeagueOfLegends import LeagueOfLegends
 from OpenVR import OpenVR, position_distance, position_average, Position, position_rotation
+from memorpy.Process import ProcessException
 
-lol = LeagueOfLegends()
+try:
+    lol = LeagueOfLegends()
+except ProcessException:
+    import sys
+    sys.exit("Make sure League of Legends.exe is running")
+
 lol.fps = True
 lol.minion_hp_bar = False
 lol.clip_distance = 30000
