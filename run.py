@@ -10,7 +10,8 @@ try:
     lol = LeagueOfLegends()
 except ProcessException:
     import sys
-    sys.exit("Make sure League of Legends.exe is running")
+    input("Make sure League of Legends.exe is running")
+    sys.exit("")
 
 lol.fps = True
 lol.minion_hp_bar = False
