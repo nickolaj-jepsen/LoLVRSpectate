@@ -35,5 +35,17 @@ Hold down the trigger and move the controller to readjust the view along the x, 
 Hold down one trigger to readjust the view along the x and y axis
 Hold down both triggers and "pinch" to zoom and rotate the controllers in relation to each other to rotate the camera
 
+## Recommended settings
+These settings are probably far from perfect, buts its the ones i use for testing
+#### League of Legends
+Reduce the resolution to a lower value, i use 1280x1024
+#### VorpX
+Enable these two settings in the settings dialog
+
+![image](https://cloud.githubusercontent.com/assets/1039554/15651345/2bc1b912-267f-11e6-9460-574598eecc36.png)
+
+In the ingame settings menu set image zoom to 0.70 and and set the head tracking sensetivity to 0.0 to avoid it moving the cursor
+
+
 ## Known issues and TODO
 Please check out the [issues tab](../../issues)
