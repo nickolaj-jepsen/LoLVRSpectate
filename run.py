@@ -77,7 +77,6 @@ while True:
             if previous_control_pos is None:
                 previous_control_pos = controller_pos
             else:
-                print(previous_control_pos, controller_pos)
                 offset(previous_control_pos[current_trigger], controller_pos[current_trigger])
                 previous_control_pos = controller_pos
         else:
