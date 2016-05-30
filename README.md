@@ -14,10 +14,12 @@ A video of an earlier version
 * 1 or 2 Motion controllers that support for the [OpenVR](https://github.com/ValveSoftware/openvr) SDK
 
 ## Installation
+Download the latest release from [here](../../releases)
+
+OR
+
 1. Install python3
 2. Install the python dependencies by running `pip install -r requirements.txt`
-
-or wait for me to build a executable. (soon™) 
 
 ## Running 
 Before running i would recommend that you create a new LoL account, this program is NOT approved by Riot, and by 
