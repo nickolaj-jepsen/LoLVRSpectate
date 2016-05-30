@@ -20,6 +20,10 @@ A video of an earlier version
 or wait for me to build a executable. (soon™) 
 
 ## Running 
+Before running i would recommend that you create a new LoL account, this program is NOT approved by Riot, and by 
+modifying the memory it might be caught by some kind of anti-cheat, however, there are multiple other programs that does
+ this, and i haven't heard anything about any of their users getting banned.
+
 1. Make sure VorpX is running
 2. Make sure the VR environment is active, ie. start SteamVR
 3. Start spectating a game or a replay
@@ -46,6 +50,10 @@ Enable these two settings in the settings dialog
 
 In the ingame settings menu set image zoom to 0.70 and and set the head tracking sensetivity to 0.0 to avoid it moving the cursor
 
-
 ## Known issues and TODO
 Please check out the [issues tab](../../issues)
+
+## Disclaimer
+LoLVRSpectate isn’t endorsed by Riot Games and doesn’t reflect the views or opinions of Riot Games 
+or anyone officially involved in producing or managing League of Legends. League of Legends and Riot Games are 
+trademarks or registered trademarks of Riot Games, Inc. League of Legends © Riot Games, Inc.
