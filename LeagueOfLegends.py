@@ -5,7 +5,7 @@ class LeagueOfLegends(object):
     def __init__(self):
         self.mw = MemWorker(b"League of Legends")
 
-        cam_base_address = self._find_cam_base_addr()
+        cam_base_address = self._cam_base_addr
 
         self._y = self.mw.Address(int(cam_base_address + 12))
         self._x = self.mw.Address(int(cam_base_address + 20))
@@ -15,17 +15,19 @@ class LeagueOfLegends(object):
         self._fov = self.mw.Address(int(cam_base_address + 340))
         self._fps_toggle = self.mw.Address(int(cam_base_address + 612))
 
-        self._clip_distance = self.mw.Address(int("02535150", base=16))
+        self._clip_distance = self.mw.Address(self._base_addr + int("1195150", base=16))
 
-        self._minion_hp_bar = self.mw.Address(self._find_minion_hp_addr())
+        self._minion_hp_bar = self.mw.Address(int(cam_base_address + 92))
 
-    def _find_cam_base_addr(self):
-        addr_1 = self.mw.Address(int("014041F4", base=16))
+    @property
+    def _base_addr(self):
+        return self.mw.process.list_modules()[0].modBaseAddr
+
+    @property
+    def _cam_base_addr(self):
+        addr_1 = self.mw.Address(self._base_addr + int("11F41F4", base=16))
         addr_2 = self.mw.Address(addr_1.read())
         return addr_2.read()
-
-    def _find_minion_hp_addr(self):
-        return self.mw.Address(int("014041F4", base=16)).read() + 92
 
     @property
     def y(self):
