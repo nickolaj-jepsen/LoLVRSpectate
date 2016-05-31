@@ -1,17 +1,20 @@
 from utils import setup_logging
+from logic import MainLogic
 import logging
+from openvr import shutdown
 
 
 def main():
+    setup_logging(debug=False)
     try:
-        setup_logging(debug=False)
-        import logic  # Temp hack, i really need to refactor the loop
-    except Exception as e:
+        logging.info("Starting main loop")
+        MainLogic().run()
+    except Exception:
         logging.exception("")
-        import sys
-        print(e)
-        input()
-        sys.exit("")
+        input("Press enter to close the program")
+        raise SystemExit(-1)
+    finally:
+        shutdown()
 
 if __name__ == '__main__':
     main()

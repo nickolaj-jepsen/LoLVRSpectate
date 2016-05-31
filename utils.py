@@ -49,6 +49,7 @@ def setup_logging(debug=False, os_info=True):
     if not debug:
         format_ = '%(asctime)-15s || %(message)s'
         logging.basicConfig(filename="LoLVRSpectate.log", format=format_, level=logging.INFO, filemode="w")
+        logging.getLogger().addHandler(logging.StreamHandler())  # Log both to file and console
     else:
         logging.basicConfig(level=logging.INFO)
 
