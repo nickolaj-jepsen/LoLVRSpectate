@@ -1,4 +1,8 @@
 import time
+import os
+import logging
+import platform
+import sys
 
 
 # From https://code.activestate.com/recipes/325905-memoize-decorator-with-timeout/
@@ -36,3 +40,22 @@ class MWT(object):
         func.func_name = f.__name__
 
         return func
+
+
+def setup_logging(debug=False, os_info=True):
+    if os.environ.get("LOLVRSPECTATE_DEBUG") == "1":
+        debug = True
+
+    if not debug:
+        format_ = '%(asctime)-15s || %(message)s'
+        logging.basicConfig(filename="LoLVRSpectate.log", format=format_, level=logging.INFO, filemode="w")
+    else:
+        logging.basicConfig(level=logging.INFO)
+
+    if os_info:
+        logging.info("Windows platform\t= {}".format(platform.platform()))
+        if 'PROGRAMFILES(X86)' in os.environ:
+            logging.info("System Arch\t\t= {}".format("64 bit"))
+        else:
+            logging.info("System Arch\t\t= {}".format("32 bit"))
+        logging.info("Python version\t= {}".format(sys.version))
