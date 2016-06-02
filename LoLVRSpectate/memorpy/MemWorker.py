@@ -14,22 +14,24 @@
 # You should have received a copy of the GNU General Public License
 # along with memorpy.  If not, see <http://www.gnu.org/licenses/>.
 
-import string
-import re
-import logging
-import memorpy.Process as Process
-import memorpy.utils as utils
-import struct
-from memorpy.Address import Address
 import binascii
-from memorpy.structures import *
+import logging
+import re
+import struct
+
+from LoLVRSpectate.memorpy import utils
+from LoLVRSpectate.memorpy.Address import Address
+from LoLVRSpectate.memorpy.structures import *
+
+from LoLVRSpectate.memorpy import Process
+
 logger = logging.getLogger('memorpy')
 
 class MemWorker(object):
 
     def __init__(self, process_name, end_offset = None, start_offset = None):
         logger.info('opening process %s ...' % process_name)
-        self.process = Process.Process()
+        self.process = Process()
         self.process.open_debug_from_name(process_name)
         si = self.process.GetSystemInfo()
         if end_offset:

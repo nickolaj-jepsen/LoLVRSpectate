@@ -1,20 +1,23 @@
-from utils import setup_logging
-from logic import MainLogic
 import logging
-from openvr import shutdown
+import openvr
+
+from LoLVRSpectate.VorpX import is_excluded
+from LoLVRSpectate.main import VRSpectate
+from LoLVRSpectate.utils import setup_logging
 
 
 def main():
     setup_logging(debug=False)
     try:
+        logging.info(is_excluded())
         logging.info("Starting main loop")
-        MainLogic().run()
+        VRSpectate().run()
     except Exception:
         logging.exception("")
         input("Press enter to close the program")
         raise SystemExit(-1)
     finally:
-        shutdown()
+        openvr.shutdown()
 
 if __name__ == '__main__':
     main()

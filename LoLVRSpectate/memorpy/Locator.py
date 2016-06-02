@@ -15,8 +15,9 @@
 # along with memorpy.  If not, see <http://www.gnu.org/licenses/>.
 
 import copy
-import time
-from memorpy.Address import Address
+
+from LoLVRSpectate.memorpy import Address
+
 
 class Locator(object):
     """ 

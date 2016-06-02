@@ -1,4 +1,4 @@
-from memorpy.MemWorker import MemWorker
+from LoLVRSpectate.memorpy.MemWorker import MemWorker
 
 
 class LeagueOfLegends(object):

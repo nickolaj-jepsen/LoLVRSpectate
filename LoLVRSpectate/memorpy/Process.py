@@ -14,13 +14,16 @@
 # You should have received a copy of the GNU General Public License
 # along with memorpy.  If not, see <http://www.gnu.org/licenses/>.
 
-from ctypes import pointer, sizeof, windll, create_string_buffer, c_ulong, byref
-from memorpy.structures import *
 import copy
 import struct
-import memorpy.utils as utils
 import win32api
 import win32security
+from ctypes import pointer, sizeof, windll, create_string_buffer, c_ulong, byref
+
+from LoLVRSpectate.memorpy.structures import *
+
+from LoLVRSpectate.memorpy import utils
+
 
 class ProcessException(Exception):
     pass

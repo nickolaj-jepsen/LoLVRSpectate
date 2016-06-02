@@ -14,9 +14,11 @@
 # You should have received a copy of the GNU General Public License
 # along with memorpy.  If not, see <http://www.gnu.org/licenses/>.
 
-from memorpy.MemWorker import *
-from memorpy.Locator import *
-from memorpy.Address import *
-from memorpy.Process import *
-from memorpy.wintools import *
-from memorpy.utils import *
+from LoLVRSpectate.memorpy.Address import *
+from LoLVRSpectate.memorpy.Locator import *
+from LoLVRSpectate.memorpy.Process import *
+from LoLVRSpectate.memorpy.utils import *
+from LoLVRSpectate.memorpy.wintools import *
+
+from LoLVRSpectate.memorpy.MemWorker import *
+
