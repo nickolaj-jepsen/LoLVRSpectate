@@ -44,7 +44,7 @@ class VRSpectate(object):
         self.scale = self.z_offset
         controller_frame = self.vr.controller_frame()
 
-        # Camera edit
+        # Camera movement
         if len(controller_frame) == 2:
             if all(controller_frame.button_pressed("trigger")):
                 self.yaw_offset += self.prev_controller_frame.relative_rotation - controller_frame.relative_rotation
