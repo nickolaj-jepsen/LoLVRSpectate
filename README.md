@@ -14,7 +14,8 @@ A video of an earlier version
 * 1 or 2 Motion controllers that support for the [OpenVR](https://github.com/ValveSoftware/openvr) SDK
 
 ## Installation
-Download the latest release from [here](../../releases)
+1. Download the latest release from [here](../../releases)
+2. Add the downloaded file to the [VorpX exception list](http://i.imgur.com/NO9g62K.png) 
 
 OR
 
