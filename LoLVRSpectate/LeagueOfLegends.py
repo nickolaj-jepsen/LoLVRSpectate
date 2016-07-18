@@ -25,7 +25,7 @@ class LeagueOfLegends(object):
 
     @property
     def _cam_base_addr(self):
-        addr_1 = self.mw.Address(self._base_addr + int("11F41F4", base=16))
+        addr_1 = self.mw.Address(self._base_addr + int("1319F30", base=16))
         addr_2 = self.mw.Address(addr_1.read())
         return addr_2.read()
 
