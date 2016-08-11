@@ -1,84 +1,107 @@
-import logging
-import math
+import sys
 import time
-from datetime import datetime
 
-from LoLVRSpectate.OpenVR import OpenVR, position_distance, position_average, Position, position_rotation
+from PySide.QtCore import *
+from PySide.QtGui import *
 
-from LoLVRSpectate.LeagueOfLegends import LeagueOfLegends
+from LoLVRSpectate.Spectate import VRSpectate
+from LoLVRSpectate.memorpy import Process
+from LoLVRSpectate.memorpy.Process import ProcessException
+from LoLVRSpectate.ui.main_dialog import Ui_MainDialog
 
 
-class VRSpectate(object):
+class SpectateThread(QThread):
+    error = Signal(str)
+
     def __init__(self):
+        super(SpectateThread, self).__init__()
+        self.spectate = None
 
-        self.lol = LeagueOfLegends()
+    def run(self, *args, **kwargs):
+        try:
+            self.spectate = VRSpectate()
+            self.spectate.run()
+        except ProcessException as e:
+            if "get pid from name" in str(e):
+                self.error.emit("LoL client was not found")
+            elif "ReadProcessMemory" in str(e):
+                self.error.emit("Either the LoL client or this program is outdated")
+            else:
+                self.error.emit(str(e))
 
-        self.lol.fps = True
-        self.lol.minion_hp_bar = False
-        self.lol.clip_distance = 30000
-        self.lol.fov = 100
 
-        self.vr = OpenVR()
+class ProcessWatcher(QThread):
+    running = Signal(bool)
 
-        self.x_offset = -3000
-        self.y_offset = 7382.5
-        self.z_offset = 5000
-        self.yaw_offset = 0
-        self.prev_controller_frame = self.vr.controller_frame()
-        self.scale = self.z_offset
-
-    def _move_offset(self, previous, current, update_z=False):
-        theta = math.radians(-self.yaw_offset)
-        cs = math.cos(theta)
-        sn = math.sin(theta)
-        if update_z:
-            self.z_offset += (previous.z - current.z) * self.scale * 2
-
-        x = (previous.x - current.x) * self.scale * 4
-        y = (previous.y - current.y) * self.scale * 4
-
-        self.x_offset += x*cs-y*sn
-        self.y_offset += x*sn+y*cs
-
-    def _next_frame(self):
-        self.scale = self.z_offset
-        controller_frame = self.vr.controller_frame()
-
-        # Camera movement
-        if len(controller_frame) == 2:
-            if all(controller_frame.button_pressed("trigger")):
-                self.yaw_offset += self.prev_controller_frame.relative_rotation - controller_frame.relative_rotation
-                self.z_offset += (self.prev_controller_frame.relative_distance - controller_frame.relative_distance) * self.z_offset * 2
-                self._move_offset(self.prev_controller_frame.position(), controller_frame.position())
-            elif any(controller_frame.button_pressed("trigger")):
-                active_controller = [i for i, x in enumerate(controller_frame.button_pressed("trigger")) if x][0]
-                self._move_offset(self.prev_controller_frame.position(active_controller), controller_frame.position(active_controller))
-        if len(controller_frame) == 1:
-            if any(controller_frame.button_pressed("trigger")):
-                self._move_offset(self.prev_controller_frame.position(), controller_frame.position(), update_z=True)
-
-        self.prev_controller_frame = controller_frame
-
-        pos = self.vr.hmd.position()
-
-        self.lol.yaw = pos.yaw + self.yaw_offset
-        self.lol.pitch = pos.pitch*-1
-        self.lol.x = (pos.x*self.scale) + self.x_offset
-        self.lol.y = (pos.y*self.scale) + self.y_offset
-        self.lol.z = (pos.z*self.scale) + self.z_offset
+    def __init__(self, process_name):
+        super(ProcessWatcher, self).__init__()
+        self.process_name = process_name
 
     def run(self):
-        fps_counter = 0
-        fps_timer = datetime.now()
-
         while True:
-            self._next_frame()
-
-            if int(fps_timer.timestamp()) < int(datetime.now().timestamp()):
-                fps_timer = datetime.now()
-                logging.info("tracking_fps: {0:03d}, controllers: {1:01d}".format(fps_counter, len(self.prev_controller_frame)))
-                fps_counter = 0
+            process = Process()
+            if not process.process_from_name(self.process_name):
+                self.running.emit(False)
             else:
-                fps_counter += 1
+                self.running.emit(True)
+            time.sleep(2)
 
-            time.sleep(0.005)
+
+class MainDialog(QDialog, Ui_MainDialog):
+    def __init__(self, parent=None):
+        super(MainDialog, self).__init__(parent)
+
+        self.spectate = None
+        self.setupUi(self)
+
+        self.lol_watcher = ProcessWatcher(b"League of Legends")
+        self.lol_watcher.running.connect(self.lol_watcher_update, Qt.QueuedConnection)
+        self.lol_watcher.start()
+
+        self.vorpx_watcher = ProcessWatcher(b"vorpControl")
+        self.vorpx_watcher.running.connect(self.vorpx_watcher_update, Qt.QueuedConnection)
+        self.vorpx_watcher.start()
+
+        self.pushButtonStart.clicked.connect(self.start_spectate)
+
+    def start_spectate(self):
+        if self.spectate is None:
+            self.spectate = SpectateThread()
+            self.spectate.error.connect(self.spectate_error, Qt.QueuedConnection)
+        self.spectate.start()
+
+    def stop_spectate(self):
+        if self.spectate is not None:
+            self.spectate.terminate()
+
+    def spectate_error(self, error):
+        error_box = QMessageBox(self)
+        error_box.setIcon(QMessageBox.Critical)
+        error_box.setText(error)
+        error_box.show()
+        self.stop_spectate()
+
+    @Slot(bool)
+    def lol_watcher_update(self, running):
+        if running:
+            self.labelLoLRunning.setText("Running")
+            self.labelLoLRunning.setStyleSheet("color: rgb(0, 135, 0)")
+        else:
+            self.labelLoLRunning.setText("Not Running")
+            self.labelLoLRunning.setStyleSheet("color: rgb(255, 0, 0)")
+
+    @Slot(bool)
+    def vorpx_watcher_update(self, running):
+        if running:
+            self.labelVorpXRunning.setText("Running")
+            self.labelVorpXRunning.setStyleSheet("color: rgb(0, 135, 0)")
+        else:
+            self.labelVorpXRunning.setText("Not Running")
+            self.labelVorpXRunning.setStyleSheet("color: rgb(255, 0, 0)")
+
+
+def start_app():
+    app = QApplication(sys.argv)
+    tray_icon = MainDialog()
+    tray_icon.show()
+    app.exec_()

@@ -1,17 +1,15 @@
 import logging
 import openvr
 
-from LoLVRSpectate.VorpX import is_excluded
-from LoLVRSpectate.main import VRSpectate
 from LoLVRSpectate.utils import setup_logging
+from LoLVRSpectate.main import start_app
 
 
 def main():
     setup_logging(debug=False)
     try:
-        logging.info(is_excluded())
         logging.info("Starting main loop")
-        VRSpectate().run()
+        start_app()
     except Exception:
         logging.exception("")
         input("Press enter to close the program")

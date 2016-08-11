@@ -25,7 +25,21 @@ class LeagueOfLegends(object):
 
     @property
     def _cam_base_addr(self):
-        addr_1 = self.mw.Address(self._base_addr + int("1319F30", base=16))
+        # HOW TO: Find base addr
+        # 1) Move screen to lowest y coord
+        # 2) Scan for float = 520
+        # 3) Move screen to highest y coord
+        # 4) Scan for float = 14765
+        # 5) Select the address that will updated the camera pos when changed
+        # 6) Right click this address and click "find out what accesses this address"
+        # 7) Select an element and press more information
+        # 8) Copy the value which is listed at the end of the string "The value of the pointer needed to find this ..."
+        # 9) Search for this this value as an 8-bit hex value
+        # 10) Now search for the first address found
+        # 11) You should now have found a "green" address, select this and double click the address
+        # 12) You should now be able to see a string similar to "League of Legends.exe"+13D4280 <-- base addr
+
+        addr_1 = self.mw.Address(self._base_addr + int("13D4280", base=16))
         addr_2 = self.mw.Address(addr_1.read())
         return addr_2.read()
 

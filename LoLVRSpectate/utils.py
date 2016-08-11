@@ -6,12 +6,15 @@ import sys
 
 
 # From https://code.activestate.com/recipes/325905-memoize-decorator-with-timeout/
+from LoLVRSpectate.VorpX import is_excluded
+
+
 class MWT(object):
     """Memoize With Timeout"""
     _caches = {}
     _timeouts = {}
 
-    def __init__(self,timeout=2):
+    def __init__(self, timeout=2):
         self.timeout = timeout
 
     def collect(self):
@@ -35,7 +38,7 @@ class MWT(object):
                 if (time.time() - v[1]) > self.timeout:
                     raise KeyError
             except KeyError:
-                v = self.cache[key] = f(*args,**kwargs),time.time()
+                v = self.cache[key] = f(*args, **kwargs), time.time()
             return v[0]
         func.func_name = f.__name__
 
@@ -54,9 +57,10 @@ def setup_logging(debug=False, os_info=True):
         logging.basicConfig(level=logging.INFO)
 
     if os_info:
-        logging.info("Windows platform\t= {}".format(platform.platform()))
+        logging.info("Win platform = {}".format(platform.platform()))
         if 'PROGRAMFILES(X86)' in os.environ:
-            logging.info("System Arch\t\t= {}".format("64 bit"))
+            logging.info("System Arch = {}".format("64 bit"))
         else:
-            logging.info("System Arch\t\t= {}".format("32 bit"))
-        logging.info("Python version\t= {}".format(sys.version))
+            logging.info("System Arch = {}".format("32 bit"))
+        logging.info("Python version = {}".format(sys.version))
+        logging.info("VorpX exclusion = {}".format(is_excluded()))
