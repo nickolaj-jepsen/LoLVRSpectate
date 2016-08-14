@@ -126,9 +126,11 @@ class MainDialog(QDialog, Ui_MainDialog):
 
     def closeEvent(self, event):
         # Stop Threads before exit
+        logging.info("shutting down threads")
         self.stop_spectate()
         self.lol_watcher.terminate()
         self.vorpx_watcher.terminate()
+        logging.info("terminating program")
         event.accept()
 
 
