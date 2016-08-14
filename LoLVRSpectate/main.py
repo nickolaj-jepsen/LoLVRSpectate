@@ -1,5 +1,7 @@
 import sys
 import time
+import pywintypes
+import logging
 
 from PySide.QtCore import *
 from PySide.QtGui import *
@@ -22,12 +24,23 @@ class SpectateThread(QThread):
             self.spectate = VRSpectate()
             self.spectate.run()
         except ProcessException as e:
+            logging.exception(e)
             if "get pid from name" in str(e):
                 self.error.emit("LoL client was not found")
             elif "ReadProcessMemory" in str(e):
                 self.error.emit("Either the LoL client or this program is outdated")
             else:
                 self.error.emit(str(e))
+        except pywintypes.error as e:
+            logging.exception(e)
+            if "SetSecurityInfo" in str(e):
+                self.error.emit("Unable to access the League of Legends client, you have to run LoLVRSpectate at the "
+                                "same permissions level as the LoL client. \nEX. if the LoL client is running as admin "
+                                "LoLVRSpectate also has to run as admin")
+        except Exception as e:
+            logging.exception(e)
+            self.error.emit("Unknown error, please submit a bug report at https://github.com/Fire-Proof/LoLVRSpectate "
+                            "(please include the LoLVRSpectate.log file)")
 
 
 class ProcessWatcher(QThread):
@@ -52,6 +65,7 @@ class MainDialog(QDialog, Ui_MainDialog):
         super(MainDialog, self).__init__(parent)
 
         self.spectate = None
+        self.spectate_started = False
         self.setupUi(self)
 
         self.lol_watcher = ProcessWatcher(b"League of Legends")
@@ -62,7 +76,17 @@ class MainDialog(QDialog, Ui_MainDialog):
         self.vorpx_watcher.running.connect(self.vorpx_watcher_update, Qt.QueuedConnection)
         self.vorpx_watcher.start()
 
-        self.pushButtonStart.clicked.connect(self.start_spectate)
+        self.pushButtonStart.clicked.connect(self.toggle_spectate)
+
+    def toggle_spectate(self):
+        if self.spectate_started:
+            self.pushButtonStart.setText("Start")
+            self.stop_spectate()
+            self.spectate_started = False
+        else:
+            self.pushButtonStart.setText("Stop")
+            self.start_spectate()
+            self.spectate_started = True
 
     def start_spectate(self):
         if self.spectate is None:
@@ -72,7 +96,8 @@ class MainDialog(QDialog, Ui_MainDialog):
 
     def stop_spectate(self):
         if self.spectate is not None:
-            self.spectate.terminate()
+            if self.spectate.isRunning():
+                self.spectate.terminate()
 
     def spectate_error(self, error):
         error_box = QMessageBox(self)
@@ -98,6 +123,13 @@ class MainDialog(QDialog, Ui_MainDialog):
         else:
             self.labelVorpXRunning.setText("Not Running")
             self.labelVorpXRunning.setStyleSheet("color: rgb(255, 0, 0)")
+
+    def closeEvent(self, event):
+        # Stop Threads before exit
+        self.stop_spectate()
+        self.lol_watcher.terminate()
+        self.vorpx_watcher.terminate()
+        event.accept()
 
 
 def start_app():
