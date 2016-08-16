@@ -35,7 +35,7 @@ class SpectateThread(QThread):
             logging.exception(e)
             if "SetSecurityInfo" in str(e):
                 self.error.emit("Unable to access the League of Legends client, you have to run LoLVRSpectate at the "
-                                "same permissions level as the LoL client. \nEX. if the LoL client is running as admin "
+                                "same privilege level as the LoL client. \nEX. if the LoL client is running as admin "
                                 "LoLVRSpectate also has to run as admin")
         except Exception as e:
             logging.exception(e)

@@ -1,3 +1,5 @@
+import logging
+
 from LoLVRSpectate.memorpy.MemWorker import MemWorker
 
 
@@ -13,7 +15,7 @@ class LeagueOfLegends(object):
         self._pitch = self.mw.Address(int(cam_base_address + 64))
         self._yaw = self.mw.Address(int(cam_base_address + 60))
         self._fov = self.mw.Address(int(cam_base_address + 340))
-        self._fps_toggle = self.mw.Address(int(cam_base_address + 612))
+        self._fps_toggle = self.mw.Address(int(cam_base_address + 616))
 
         self._clip_distance = self.mw.Address(self._base_addr + int("1195150", base=16))
 
@@ -39,7 +41,9 @@ class LeagueOfLegends(object):
         # 11) You should now have found a "green" address, select this and double click the address
         # 12) You should now be able to see a string similar to "League of Legends.exe"+13D4280 <-- base addr
 
-        addr_1 = self.mw.Address(self._base_addr + int("13D4280", base=16))
+        addr = self._base_addr + int("13D4280", base=16)
+        addr_1 = self.mw.Address(addr)
+        logging.debug("Base address: " + str(addr))
         addr_2 = self.mw.Address(addr_1.read())
         return addr_2.read()
 

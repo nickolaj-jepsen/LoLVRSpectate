@@ -66,6 +66,10 @@ class VRSpectate(object):
         self.lol.y = (pos.y*self.scale) + self.y_offset
         self.lol.z = (pos.z*self.scale) + self.z_offset
 
+        logging.debug("HMD:   x:{x:.2f},      y:{y:.2f},      z:{z:.2f}".format(x=pos.x, y=pos.y, z=pos.z))
+        logging.debug("HMD: yaw:{yaw:.2f}, pitch:{pitch:.2f}, roll:{roll:.2f}".format(yaw=pos.yaw, pitch=pos.pitch,
+                                                                                      roll=pos.roll))
+
     def run(self):
         fps_counter = 0
         fps_timer = datetime.now()
