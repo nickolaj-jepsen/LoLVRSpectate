@@ -43,7 +43,7 @@ class LeagueOfLegends(object):
 
         addr = self._base_addr + int("13D4280", base=16)
         addr_1 = self.mw.Address(addr)
-        logging.debug("Base address: " + str(addr))
+        logging.debug(f"Base address: {str(addr)}")
         addr_2 = self.mw.Address(addr_1.read())
         return addr_2.read()
 

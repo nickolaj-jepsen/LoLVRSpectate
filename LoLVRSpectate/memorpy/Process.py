@@ -63,11 +63,14 @@ class Process(object):
 
     def name_from_process(self, dwProcessId):
         process_list = self.list()
-        for process in process_list:
-            if process.th32ProcessID == dwProcessId:
-                return process.szExeFile[:-4]
-
-        return False
+        return next(
+            (
+                process.szExeFile[:-4]
+                for process in process_list
+                if process.th32ProcessID == dwProcessId
+            ),
+            False,
+        )
 
     def process32_from_id(self, dwProcessId):
         process_list = self.list()
@@ -76,12 +79,11 @@ class Process(object):
                 return process
 
     def process_from_name(self, processName):
-        processes = []
-        for process in self.list():
-            if processName == process.szExeFile[:-4]:
-                processes.append(process)
-
-        if len(processes) > 0:
+        if processes := [
+            process
+            for process in self.list()
+            if processName == process.szExeFile[:-4]
+        ]:
             return processes
 
     def open(self, dwProcessId):
@@ -104,10 +106,10 @@ class Process(object):
         return False
 
     def open_debug_from_name(self, processName):
-        dwProcessId = self.process_from_name(processName)
-        if not dwProcessId:
+        if dwProcessId := self.process_from_name(processName):
+            self.open_debug(dwProcessId[0].th32ProcessID)
+        else:
             raise ProcessException("can't get pid from name %s" % processName)
-        self.open_debug(dwProcessId[0].th32ProcessID)
 
     def open_debug(self, dwProcessId):
         process = OpenProcess(262144, 0, dwProcessId)
@@ -189,7 +191,7 @@ class Process(object):
         return data
 
     def read(self, address, _type ='uint', maxlen = 50):
-        if _type == 's' or _type == 'string':
+        if _type in ['s', 'string']:
             s = self.read_bytes(int(address), bytes=maxlen)
             news = ''
             for c in s:
@@ -199,24 +201,28 @@ class Process(object):
 
             raise ProcessException('string > maxlen')
         else:
-            if _type == 'bytes' or _type == 'b':
+            if _type in ['bytes', 'b']:
                 return self.read_bytes(int(address), bytes=maxlen)
             s, l = utils.type_unpack(_type)
             return struct.unpack(s, self.read_bytes(int(address), bytes=l))[0]
 
     def write(self, address, data, type = 'uint'):
-        if type != 'bytes':
-            s, l = utils.type_unpack(type)
-            return self.write_bytes(int(address), struct.pack(s, data))
-        else:
+        if type == 'bytes':
             return self.write_bytes(int(address), data)
+        s, l = utils.type_unpack(type)
+        return self.write_bytes(int(address), struct.pack(s, data))
 
     def get_symbolic_name(self, address):
-        for m in self.list_modules():
-            if int(m.modBaseAddr) <= int(address) < int(m.modBaseAddr + m.modBaseSize):
-                return '%s+0x%08X' % (m.szModule, int(address) - m.modBaseAddr)
-
-        return '0x%08X' % int(address)
+        return next(
+            (
+                '%s+0x%08X' % (m.szModule, int(address) - m.modBaseAddr)
+                for m in self.list_modules()
+                if int(m.modBaseAddr)
+                <= int(address)
+                < int(m.modBaseAddr + m.modBaseSize)
+            ),
+            '0x%08X' % int(address),
+        )
 
     def list_modules(self):
         """
@@ -241,11 +247,7 @@ class Process(object):
         if module[-4:] != '.dll':
             module += '.dll'
         module_list = self.list_modules()
-        for m in module_list:
-            if module in m.szExePath.split('\\'):
-                return True
-
-        return False
+        return any(module in m.szExePath.split('\\') for m in module_list)
 
     def get_instruction(self, address):
         """

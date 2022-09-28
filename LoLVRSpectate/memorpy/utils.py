@@ -18,11 +18,7 @@ import re
 import struct
 
 def re_to_unicode(s):
-    newstring = ''
-    for c in s:
-        newstring += re.escape(c) + '\\x00'
-
-    return newstring
+    return ''.join(re.escape(c) + '\\x00' for c in s)
 
 
 def type_unpack(type):
@@ -55,8 +51,8 @@ def type_unpack(type):
         s = 'd'
         l = 8
     else:
-        raise TypeError('Unknown type %s' % type)
-    return ('<' + s, l)
+        raise TypeError(f'Unknown type {type}')
+    return f'<{s}', l
 
 
 def hex_dump(data, addr = 0, prefix = '', ftype = 'bytes'):
@@ -71,11 +67,7 @@ def hex_dump(data, addr = 0, prefix = '', ftype = 'bytes'):
             if addr % 16 == 0:
                 dump += ' '
                 for char in slice:
-                    if ord(char) >= 32 and ord(char) <= 126:
-                        dump += char
-                    else:
-                        dump += '.'
-
+                    dump += char if ord(char) >= 32 and ord(char) <= 126 else '.'
                 dump += '\n%s%08X: ' % (prefix, addr)
                 slice = ''
             tmpval = 'NaN'
@@ -85,12 +77,10 @@ def hex_dump(data, addr = 0, prefix = '', ftype = 'bytes'):
             except Exception as e:
                 print(e)
 
-            if tmpval == 'NaN':
+            if tmpval == 'NaN' or ftype != 'float':
                 dump += '{:<15} '.format(tmpval)
-            elif ftype == 'float':
-                dump += '{:<15.4f} '.format(tmpval)
             else:
-                dump += '{:<15} '.format(tmpval)
+                dump += '{:<15.4f} '.format(tmpval)
             addr += structlen
 
     else:
@@ -98,11 +88,7 @@ def hex_dump(data, addr = 0, prefix = '', ftype = 'bytes'):
             if addr % 16 == 0:
                 dump += ' '
                 for char in slice:
-                    if ord(char) >= 32 and ord(char) <= 126:
-                        dump += char
-                    else:
-                        dump += '.'
-
+                    dump += char if ord(char) >= 32 and ord(char) <= 126 else '.'
                 dump += '\n%s%08X: ' % (prefix, addr)
                 slice = ''
             dump += '%02X ' % ord(byte)
@@ -113,9 +99,5 @@ def hex_dump(data, addr = 0, prefix = '', ftype = 'bytes'):
     if remainder != 0:
         dump += '   ' * (16 - remainder) + ' '
     for char in slice:
-        if ord(char) >= 32 and ord(char) <= 126:
-            dump += char
-        else:
-            dump += '.'
-
+        dump += char if ord(char) >= 32 and ord(char) <= 126 else '.'
     return dump + '\n'

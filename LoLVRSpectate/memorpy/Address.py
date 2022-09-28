@@ -41,10 +41,11 @@ class Address(object):
 
         if not type:
             type = self.default_type
-        if not maxlen:
-            return self.process.read(self.value, _type=type)
-        else:
-            return self.process.read(self.value, _type=type, maxlen=maxlen)
+        return (
+            self.process.read(self.value, _type=type, maxlen=maxlen)
+            if maxlen
+            else self.process.read(self.value, _type=type)
+        )
 
     def write(self, data, type = None):
         if not type:
@@ -73,12 +74,16 @@ class Address(object):
     def __repr__(self):
         if not self.symbolic_name:
             self.symbolic_name = self.symbol()
-        return str('<Addr: %s' % self.symbolic_name + '>')
+        return str(f'<Addr: {self.symbolic_name}>')
 
     def __str__(self):
         if not self.symbolic_name:
             self.symbolic_name = self.symbol()
-        return str('<Addr: %s' % self.symbolic_name + ' : "%s" (%s)>' % (str(self.read()).encode('string_escape'), self.default_type))
+        return str(
+            f'<Addr: {self.symbolic_name}'
+            + ' : "%s" (%s)>'
+            % (str(self.read()).encode('string_escape'), self.default_type)
+        )
 
     def __int__(self):
         return int(self.value)
