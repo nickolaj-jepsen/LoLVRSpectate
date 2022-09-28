@@ -116,28 +116,25 @@ class Buttons(object):
 
         pressed_value = self.value.ulButtonPressed
 
-        if pressed_value - 8589934592 >= 0:
+        if pressed_value >= 8589934592:
             self.trigger_button = True
             pressed_value -= 8589934592
         else:
             self.trigger_button = False
 
-        if pressed_value - 4294967296 >= 0:
+        if pressed_value >= 4294967296:
             self.touchpad_button = True
             pressed_value -= 4294967296
         else:
             self.touchpad_button = False
 
-        if pressed_value - 4 >= 0:
+        if pressed_value >= 4:
             self.grip_button = True
             pressed_value -= 4
         else:
             self.grip_button = False
 
-        if pressed_value - 2 >= 0:
-            self.menu_button = True
-        else:
-            self.menu_button = False
+        self.menu_button = pressed_value >= 2
 
     def __getitem__(self, item):
         """
@@ -148,13 +145,13 @@ class Buttons(object):
         :return: value of the button
         :rtype: bool
         """
-        if "trigger" == item:
+        if item == "trigger":
             return self.trigger_button
-        if "touchpad" == item:
+        if item == "touchpad":
             return self.touchpad_button
-        if "grip" == item:
+        if item == "grip":
             return self.grip_button
-        if "menu" == item:
+        if item == "menu":
             return self.menu_button
 
 
@@ -167,10 +164,7 @@ class TrackedDevice(object):
         :type vr: openvr.IVRSystem
         """
 
-        if vr is None:
-            self.openvr = openvr.init(openvr.VRApplication_Utility)
-        else:
-            self.openvr = vr
+        self.openvr = openvr.init(openvr.VRApplication_Utility) if vr is None else vr
 
     def position(self):
         """
@@ -312,11 +306,12 @@ class OpenVR(object):
         :return: list of active controllers
         :rtype: list
         """
-        val = []
-        for x in range(0, openvr.k_unMaxTrackedDeviceCount):
-            if self.openvr.getTrackedDeviceClass(x) == 2 and self.openvr.getControllerState(x)[0] != 0:
-                val.append(Controller(x))
-        return val
+        return [
+            Controller(x)
+            for x in range(openvr.k_unMaxTrackedDeviceCount)
+            if self.openvr.getTrackedDeviceClass(x) == 2
+            and self.openvr.getControllerState(x)[0] != 0
+        ]
 
     def controller_frame(self):
         """

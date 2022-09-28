@@ -20,10 +20,13 @@ class MWT(object):
     def collect(self):
         """Clear cache of results which have timed out"""
         for func in self._caches:
-            cache = {}
-            for key in self._caches[func]:
-                if (time.time() - self._caches[func][key][1]) < self._timeouts[func]:
-                    cache[key] = self._caches[func][key]
+            cache = {
+                key: self._caches[func][key]
+                for key in self._caches[func]
+                if (time.time() - self._caches[func][key][1])
+                < self._timeouts[func]
+            }
+
             self._caches[func] = cache
 
     def __call__(self, f):
@@ -57,10 +60,10 @@ def setup_logging(debug=False, os_info=True):
         logging.basicConfig(level=logging.DEBUG)
 
     if os_info:
-        logging.info("Win platform = {}".format(platform.platform()))
+        logging.info(f"Win platform = {platform.platform()}")
         if 'PROGRAMFILES(X86)' in os.environ:
-            logging.info("System Arch = {}".format("64 bit"))
+            logging.info('System Arch = 64 bit')
         else:
-            logging.info("System Arch = {}".format("32 bit"))
-        logging.info("Python version = {}".format(sys.version))
-        logging.info("VorpX exclusion = {}".format(is_excluded()))
+            logging.info('System Arch = 32 bit')
+        logging.info(f"Python version = {sys.version}")
+        logging.info(f"VorpX exclusion = {is_excluded()}")

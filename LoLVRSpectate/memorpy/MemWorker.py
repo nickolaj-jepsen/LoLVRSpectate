@@ -30,18 +30,12 @@ logger = logging.getLogger('memorpy')
 class MemWorker(object):
 
     def __init__(self, process_name, end_offset = None, start_offset = None):
-        logger.info('opening process %s ...' % process_name)
+        logger.info(f'opening process {process_name} ...')
         self.process = Process()
         self.process.open_debug_from_name(process_name)
         si = self.process.GetSystemInfo()
-        if end_offset:
-            self.end_offset = end_offset
-        else:
-            self.end_offset = si.lpMaximumApplicationAddress
-        if start_offset:
-            self.start_offset = start_offset
-        else:
-            self.start_offset = si.lpMinimumApplicationAddress
+        self.end_offset = end_offset or si.lpMaximumApplicationAddress
+        self.start_offset = start_offset or si.lpMinimumApplicationAddress
 
     def Address(self, value, default_type = 'uint'):
         """ wrapper to instanciate an Address class for the memworker.process"""
@@ -51,7 +45,7 @@ class MemWorker(object):
         address = int(address)
         for m in self.process.list_modules():
             for addr in self.mem_search(address, ftype='ulong', start_offset=m.modBaseAddr, end_offset=m.modBaseSize):
-                logger.debug('found module %s => addr %s' % (m.szModule, addr))
+                logger.debug(f'found module {m.szModule} => addr {addr}')
 
     def umem_replace(self, regex, replace):
         """ like search_replace_mem but works with unicode strings """
@@ -64,36 +58,34 @@ class MemWorker(object):
         allWritesSucceed = True
         for start_offset in self.mem_search(regex, ftype='re'):
             if self.process.write_bytes(start_offset, replace) == 1:
-                logger.debug('Write at offset %s succeeded !' % start_offset)
+                logger.debug(f'Write at offset {start_offset} succeeded !')
             else:
                 allWritesSucceed = False
-                logger.debug('Write at offset %s failed !' % start_offset)
+                logger.debug(f'Write at offset {start_offset} failed !')
 
         return allWritesSucceed
 
     def umem_search(self, regex):
         """ like mem_search but works with unicode strings """
         regex = utils.re_to_unicode(regex)
-        for i in self.mem_search(str(regex), ftype='re'):
-            yield i
+        yield from self.mem_search(str(regex), ftype='re')
 
     def group_search(self, group, start_offset = None, end_offset = None):
         regex = ''
         for value, type in group:
-            if type == 'f' or type == 'float':
-                f = struct.pack('<f', float(value))
-                regex += '..' + f[2:4]
-            else:
-                raise NotImplementedError('unknown type %s' % type)
+            if type not in ['f', 'float']:
+                raise NotImplementedError(f'unknown type {type}')
 
+            f = struct.pack('<f', float(value))
+            regex += f'..{f[2:4]}'
         return self.mem_search(regex, ftype='re', start_offset=start_offset, end_offset=end_offset)
 
     def search_address(self, addr):
         a = '%08X' % addr
-        logger.debug('searching address %s' % a)
-        regex = ''
-        for i in range(len(a) - 2, -1, -2):
-            regex += binascii.unhexlify(a[i:i + 2])
+        logger.debug(f'searching address {a}')
+        regex = ''.join(
+            binascii.unhexlify(a[i : i + 2]) for i in range(len(a) - 2, -1, -2)
+        )
 
         return self.mem_search(re.escape(regex), ftype='re')
 
@@ -105,24 +97,16 @@ class MemWorker(object):
         if type(value) is list:
             ftype = 'group'
         if ftype == 're':
-            if type(value) is str:
-                regex = re.compile(value)
-            else:
-                regex = value
-        if start_offset is None:
-            offset = self.start_offset
-        else:
-            offset = start_offset
+            regex = re.compile(value) if type(value) is str else value
+        offset = self.start_offset if start_offset is None else start_offset
         if end_offset is None:
             end_offset = self.end_offset
         if ftype == 'float':
             structtype, structlen = utils.type_unpack(ftype)
-        elif ftype != 'match' and ftype != 'group' and ftype != 're':
+        elif ftype not in ['match', 'group', 're']:
             structtype, structlen = utils.type_unpack(ftype)
             value = struct.pack(structtype, value)
-        while True:
-            if offset >= end_offset:
-                break
+        while not offset >= end_offset:
             totalread = 0
             mbi = self.process.VirtualQueryEx(offset)
             offset = mbi.BaseAddress
@@ -132,10 +116,14 @@ class MemWorker(object):
             if state & MEM_FREE or state & MEM_RESERVE:
                 offset += chunk
                 continue
-            if protec:
-                if not protect & protec or protect & PAGE_NOCACHE or protect & PAGE_WRITECOMBINE or protect & PAGE_GUARD:
-                    offset += chunk
-                    continue
+            if protec and (
+                not protect & protec
+                or protect & PAGE_NOCACHE
+                or protect & PAGE_WRITECOMBINE
+                or protect & PAGE_GUARD
+            ):
+                offset += chunk
+                continue
             b = ''
             try:
                 b = self.process.read_bytes(offset, chunk)
@@ -158,7 +146,7 @@ class MemWorker(object):
                             index = b.find(res, index + len(res))
 
                 elif ftype == 'float':
-                    for index in range(0, len(b)):
+                    for index in range(len(b)):
                         try:
                             tmpval = struct.unpack(structtype, b[index:index + 4])[0]
                             if int(value) == int(tmpval):

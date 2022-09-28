@@ -52,9 +52,10 @@ class VRSpectate(object):
             elif any(controller_frame.button_pressed("trigger")):
                 active_controller = [i for i, x in enumerate(controller_frame.button_pressed("trigger")) if x][0]
                 self._move_offset(self.prev_controller_frame.position(active_controller), controller_frame.position(active_controller))
-        if len(controller_frame) == 1:
-            if any(controller_frame.button_pressed("trigger")):
-                self._move_offset(self.prev_controller_frame.position(), controller_frame.position(), update_z=True)
+        if len(controller_frame) == 1 and any(
+            controller_frame.button_pressed("trigger")
+        ):
+            self._move_offset(self.prev_controller_frame.position(), controller_frame.position(), update_z=True)
 
         self.prev_controller_frame = controller_frame
 

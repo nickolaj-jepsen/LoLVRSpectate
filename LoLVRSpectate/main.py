@@ -95,9 +95,8 @@ class MainDialog(QDialog, Ui_MainDialog):
         self.spectate.start()
 
     def stop_spectate(self):
-        if self.spectate is not None:
-            if self.spectate.isRunning():
-                self.spectate.terminate()
+        if self.spectate is not None and self.spectate.isRunning():
+            self.spectate.terminate()
 
     def spectate_error(self, error):
         error_box = QMessageBox(self)
